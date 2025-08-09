@@ -28,7 +28,7 @@ export const useMediaStream = () => {
     }
     return false;
   };
-
+  
   const stopLocalStream = () => {
     if (localStream) {
       localStream.getTracks().forEach(track => track.stop());
@@ -44,3 +44,11 @@ export const useMediaStream = () => {
     stopLocalStream
   };
 };
+
+// Это значит, что когда ты используешь этот хук в React-компоненте, ты можешь взять:
+// localStream — твой аудио/видео поток,
+// localAudioRef — ссылку для работы с аудио элементом (например, чтоб проигрывать звук),
+// и функции для управления:
+// initializeLocalStream() — чтобы включить микрофон и получить поток,
+// toggleMute() — чтобы включать/выключать микрофон,
+// stopLocalStream() — чтобы остановить микрофон.

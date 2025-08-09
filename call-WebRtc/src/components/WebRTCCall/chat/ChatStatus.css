@@ -1,0 +1,169 @@
+.chat-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.status-indicator.active .status-dot {
+  background: #28a745;
+  box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.2);
+}
+
+.status-indicator.inactive .status-dot {
+  background: #dc3545;
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.2);
+}
+
+.status-indicator span {
+  font-weight: 500;
+  font-size: 11px;
+}
+
+.unread-badge {
+  background: #dc3545;
+  color: white;
+  border-radius: 10px;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  min-width: 18px;
+  text-align: center;
+  animation: bounce 0.6s ease;
+}
+
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #667eea;
+  font-style: italic;
+}
+
+.typing-dots {
+  display: flex;
+  gap: 2px;
+}
+
+.typing-dots .dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #667eea;
+  animation: typing 1.4s infinite ease-in-out;
+}
+
+.typing-dots .dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.typing-dots .dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-3px);
+  }
+  60% {
+    transform: translateY(-1px);
+  }
+}
+
+@keyframes typing {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .chat-status {
+    gap: 6px;
+    font-size: 11px;
+  }
+  
+  .status-dot {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .status-indicator span {
+    font-size: 10px;
+  }
+  
+  .unread-badge {
+    padding: 1px 4px;
+    font-size: 9px;
+    min-width: 16px;
+  }
+  
+  .typing-dots .dot {
+    width: 3px;
+    height: 3px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chat-status {
+    gap: 4px;
+    font-size: 10px;
+  }
+  
+  .status-dot {
+    width: 5px;
+    height: 5px;
+  }
+  
+  .status-indicator span {
+    font-size: 9px;
+  }
+  
+  .unread-badge {
+    padding: 1px 3px;
+    font-size: 8px;
+    min-width: 14px;
+  }
+  
+  .typing-dots .dot {
+    width: 2px;
+    height: 2px;
+  }
+} 

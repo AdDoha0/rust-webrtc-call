@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import RoomJoinForm from './RoomJoinForm';
 import CallControls from './WebRTCCall/controls/CallControls';
+import ChatContainer from './WebRTCCall/chat/ChatContainer';
 import { useWebRTC } from './WebRTCCall/hooks/useWebRTC';
 import './WebRTCCall.css';
 
@@ -55,6 +56,14 @@ const WebRTCCall = () => {
           />
         )}
       </div>
+      
+      {/* Чат доступен только когда пользователь в комнате */}
+      {isInRoom && (
+        <ChatContainer 
+          roomId={roomId}
+          isCallActive={isCallActive}
+        />
+      )}
     </div>
   );
 };
