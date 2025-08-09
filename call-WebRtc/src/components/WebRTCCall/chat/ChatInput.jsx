@@ -1,15 +1,16 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Send, Mic, MicOff } from 'lucide-react';
+import { cn } from '../../../lib/utils';
 import QuickMessages from './QuickMessages';
-import './ChatInput.css';
 
 const ChatInput = ({ onSendMessage, isCallActive }) => {
   const [message, setMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const inputRef = useRef(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (message.trim()) {
+    if (message.trim() && isCallActive) {
       onSendMessage(message);
       setMessage('');
       setIsTyping(false);
@@ -28,47 +29,69 @@ const ChatInput = ({ onSendMessage, isCallActive }) => {
     setIsTyping(e.target.value.length > 0);
   };
 
-  useEffect(() => {
-    if (isCallActive) {
-      inputRef.current?.focus();
-    }
-  }, [isCallActive]);
-
   return (
-    <div className="chat-input-container">
-      <form onSubmit={handleSubmit} className="chat-input-form">
-        <div className="input-wrapper">
-          <QuickMessages onSendMessage={onSendMessage} isCallActive={isCallActive} />
-          <textarea
-            ref={inputRef}
-            value={message}
-            onChange={handleInputChange}
-            onKeyPress={handleKeyPress}
-            placeholder="Введите сообщение..."
-            className="chat-input"
-            rows="1"
-            disabled={!isCallActive}
-          />
-          <button
+    <form onSubmit={handleSubmit} className="space-y-3">
+      <QuickMessages onSendMessage={onSendMessage} isCallActive={isCallActive} />
+      <div className="relative">
+        <textarea
+          value={message}
+          onChange={handleInputChange}
+          onKeyPress={handleKeyPress}
+          placeholder={isCallActive ? "Введите сообщение..." : "Чат недоступен во время звонка"}
+          disabled={!isCallActive}
+          className={cn(
+            "w-full resize-none rounded-lg border border-white/20 bg-white/10 px-4 py-3 pr-12 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200",
+            !isCallActive && "opacity-50 cursor-not-allowed"
+          )}
+          rows={1}
+          style={{ minHeight: '44px', maxHeight: '120px' }}
+        />
+        
+        <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
+          {!isCallActive && (
+            <MicOff className="w-4 h-4 text-slate-500" />
+          )}
+          
+          <motion.button
             type="submit"
-            className={`send-button ${message.trim() ? 'active' : ''}`}
             disabled={!message.trim() || !isCallActive}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className={cn(
+              "p-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-slate-900",
+              message.trim() && isCallActive
+                ? "bg-primary-600 hover:bg-primary-700 text-white"
+                : "bg-slate-600 text-slate-400 cursor-not-allowed"
+            )}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-            </svg>
-          </button>
+            <Send className="w-4 h-4" />
+          </motion.button>
         </div>
-        {!isCallActive && (
-          <div className="call-required-notice">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-            </svg>
-            <span>Начните звонок для отправки сообщений</span>
+      </div>
+
+      {/* Индикатор печати */}
+      {isTyping && isCallActive && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-2 text-xs text-slate-400"
+        >
+          <div className="flex gap-1">
+            <div className="w-1 h-1 bg-slate-400 rounded-full animate-bounce" />
+            <div className="w-1 h-1 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+            <div className="w-1 h-1 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
           </div>
-        )}
-      </form>
-    </div>
+          <span>Печатаете...</span>
+        </motion.div>
+      )}
+
+      {/* Подсказка */}
+      {!isCallActive && (
+        <div className="text-xs text-slate-400 text-center">
+          Чат будет доступен после начала звонка
+        </div>
+      )}
+    </form>
   );
 };
 
