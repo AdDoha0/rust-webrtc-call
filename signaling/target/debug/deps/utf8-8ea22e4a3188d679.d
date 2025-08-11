@@ -1,0 +1,7 @@
+/home/user/my_projects/call_WebRtc/signaling/target/debug/deps/utf8-8ea22e4a3188d679.d: /home/user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/utf-8-0.7.6/src/lib.rs /home/user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/utf-8-0.7.6/src/lossy.rs /home/user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/utf-8-0.7.6/src/read.rs
+
+/home/user/my_projects/call_WebRtc/signaling/target/debug/deps/libutf8-8ea22e4a3188d679.rmeta: /home/user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/utf-8-0.7.6/src/lib.rs /home/user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/utf-8-0.7.6/src/lossy.rs /home/user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/utf-8-0.7.6/src/read.rs
+
+/home/user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/utf-8-0.7.6/src/lib.rs:
+/home/user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/utf-8-0.7.6/src/lossy.rs:
+/home/user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/utf-8-0.7.6/src/read.rs:
