@@ -660,6 +660,7 @@ dependencies = [
  "dotenvy",
  "serde",
  "serde_json",
+ "thiserror",
  "tokio",
  "tracing",
  "uuid",
