@@ -1,52 +1,53 @@
-use std::{clone, collections::HashMap, sync::Arc};
-use tokio::sync::{RwLock, mpsc};
-
-// use futures_util::{SinkExt, StreamExt};
-
-use axum::{
-    extract::ws::{WebSocket, Message, WebSocketUpgrade},
-    response::IntoResponse,
-    routing::get,
-    Router,
-};
+use std::{collections::HashMap, sync::Arc};
+use tokio::sync::{mpsc, RwLock};
+use serde::{Serialize, Deserialize};
 use uuid::Uuid;
+use axum::extract::ws::{Message as WsMessage, Message}; // импортируем Message правильно
 
-type Tx = mpsc::UnboundedSender<String>;
+use super::message::{ClientId, SignalMessage}; 
+
+
+pub type Tx = mpsc::UnboundedSender<WsMessage>;
 
 pub struct WsHub {
-    clients: HashMap<String, Tx>
+    pub rooms: HashMap<String, HashMap<ClientId, Tx>>,
 }
 
 impl WsHub {
     pub fn new() -> Self {
-        Self {
-            clients: HashMap::new(),
+        Self { rooms: HashMap::new() }
+    }
+
+    pub fn add_client(&mut self, room_id: &str, client_id: ClientId, tx: Tx) {
+        self.rooms.entry(room_id.to_string())
+            .or_insert_with(HashMap::new)
+            .insert(client_id, tx);
+    }
+
+    pub fn remove_client(&mut self, room_id: &str, client_id: &ClientId) {
+        if let Some(room) = self.rooms.get_mut(room_id) {
+            room.remove(client_id);
+            if room.is_empty() {
+                self.rooms.remove(room_id); // удаляем комнату, если она пуста
+            }
         }
     }
 
-    // Добавить нового клиента
-    pub fn add_client(&mut self, client_id: String, sender: Tx) {
-        self.clients.insert(client_id, sender);
+    pub async fn send_to(&self, room_id: &str, target: &ClientId, msg: &SignalMessage) {
+        if let Some(room) = self.rooms.get(room_id) {
+            if let Some(tx) = room.get(target) {
+                let text = serde_json::to_string(msg).unwrap().into();
+                let _ = tx.send(text);
+            }
+        }
     }
 
-    // Удалить клиента 
-    pub fn remove_client(&mut self, client_id: String) {
-        self.clients.remove(&client_id); 
-    }
-
-    // Отправить сообщение по id
-    pub fn send_to(&self, client_id: String, msg: &str) {
-        if let Some(tx) = self.clients.get(&client_id) {
-            let _ = tx.send(msg.to_string());
-        } 
-    }
-
-
-    // Рассылка сообщения всем клиентам
-    pub fn broadcast(&self, msg: &str) {
-        for tx in self.clients.values() {
-            let _ = tx.send(msg.to_string());
+    pub async fn broadcast(&self, room_id: &str, msg: &SignalMessage) {
+        if let Some(room) = self.rooms.get(room_id) {
+            let text = WsMessage::Text(serde_json::to_string(msg).unwrap().into());
+            for tx in room.values() {
+                let _ = tx.send(text.clone());
+            }
         }
     }
 }
-

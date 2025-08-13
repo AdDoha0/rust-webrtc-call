@@ -4,6 +4,7 @@ use axum::{Router, routing::get};
 use tokio::sync::RwLock;
 
 use crate::app_state::AppState;
+use crate::router::app_router;
 
 mod ws;
 mod router;
@@ -16,6 +17,7 @@ mod common;
 async fn main() {
     // Загрузим переменные окружения, если есть .env
     let _ = dotenvy::dotenv();
+    tracing_subscriber::fmt::init();
 
     info!("Starting signaling server...");
 
@@ -34,11 +36,10 @@ async fn main() {
     let hub = Arc::new(RwLock::new(ws::hub::WsHub::new()));
     let state = AppState { hub };
 
-    // Базовый роутер c health-check
-    let app = Router::new()
-        .route("/", get(|| async { "Signaling server is running" }))
-        .with_state(state);
+    let app = app_router(state);
 
+
+    // Базовый роутер c health-check
     info!("Listening on {}", addr);
 
     // Запуск сервера (Axum 0.8)

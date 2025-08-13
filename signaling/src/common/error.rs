@@ -1,8 +1,11 @@
 use thiserror::Error;
 use axum::{
-    response::{IntoResponse, Response},
-    http::StatusCode,
+    http::StatusCode, response::{IntoResponse, Response}, Json
 };
+
+use serde::Serialize; 
+
+
 
 
 #[derive(Error, Debug)]
@@ -32,25 +35,25 @@ pub enum AppError {
 
 #[derive(Serialize)]
 struct ErrorResponse {
-    error: String,
+    pub error: String,
+    pub r#type: String,
 }
 
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
-        // Определяем HTTP статус в зависимости от варианта ошибки
-        let (status, error_message) = match &self {
-            SignalError::WsConnectionError(_) => (StatusCode::INTERNAL_SERVER_ERROR, self.to_string()),
-            SignalError::InvalidMessageFormat => (StatusCode::BAD_REQUEST, self.to_string()),
-            SignalError::AuthenticationError => (StatusCode::UNAUTHORIZED, self.to_string()),
-            SignalError::Unauthorized => (StatusCode::FORBIDDEN, self.to_string()),
-            SignalError::UserNotFound(_) => (StatusCode::NOT_FOUND, self.to_string()),
-            SignalError::RoomNotFound(_) => (StatusCode::NOT_FOUND, self.to_string()),
-            SignalError::InternalError => (StatusCode::INTERNAL_SERVER_ERROR, self.to_string()),
+        let (status, error_message, error_type) = match &self {
+            AppError::WsConnectionError(_) => (StatusCode::INTERNAL_SERVER_ERROR, self.to_string(), "WsConnectionError"),
+            AppError::InvalidMessageFormat => (StatusCode::BAD_REQUEST, self.to_string(), "InvalidMessageFormat"),
+            AppError::AuthenticationError => (StatusCode::UNAUTHORIZED, self.to_string(), "AuthenticationError"),
+            AppError::Unauthorized => (StatusCode::FORBIDDEN, self.to_string(), "Unauthorized"),
+            AppError::UserNotFound(_) => (StatusCode::NOT_FOUND, self.to_string(), "UserNotFound"),
+            AppError::RoomNotFound(_) => (StatusCode::NOT_FOUND, self.to_string(), "RoomNotFound"),
+            AppError::InternalError => (StatusCode::INTERNAL_SERVER_ERROR, self.to_string(), "InternalError"),
         };
 
-        // Создаём JSON с сообщением об ошибке
         let body = Json(ErrorResponse {
             error: error_message,
+            r#type: error_type.to_string(),
         });
 
         (status, body).into_response()
