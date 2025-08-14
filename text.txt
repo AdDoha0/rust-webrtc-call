@@ -1,0 +1,4 @@
+POST /api/rooms - создать комнату
+GET /api/rooms - список активных комнат
+GET /api/rooms/{id} - информация о комнате
+DELETE /api/rooms/{id} - удалить комнату
