@@ -2,6 +2,8 @@ use std::{net::SocketAddr, sync::Arc};
 use tracing::info;
 use axum::{Router, routing::get};
 use tokio::sync::RwLock;
+use sqlx::PgPool;
+use std::env;
 
 use crate::app_state::AppState;
 use crate::router::app_router;
@@ -32,12 +34,18 @@ async fn main() {
         .parse()
         .expect("Invalid HOST/PORT provided");
 
-    // Инициализируем общий хаб (в дальнейшем для WS)
+    // Инициализируем общий хаб 
     let hub = Arc::new(RwLock::new(ws::hub::WsHub::new()));
-    let state = AppState { hub };
 
-    let app = app_router(state);
+    dotenv::dotenv().ok(); 
+    let database_url = env::var("DATABASE_URL").expect("Connect database url!");
 
+    let db_pool = PgPool::connect(&database_url)
+        .await
+        .expect("Failed to connect to Postgres");
+
+
+    let app = app_router(AppState { hub: hub, db_pool: db_pool });
 
     // Базовый роутер c health-check
     info!("Listening on {}", addr);
