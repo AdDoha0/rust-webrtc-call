@@ -12,6 +12,7 @@ mod ws;
 mod router;
 mod app_state;
 mod common;
+mod modules;
 
 
 

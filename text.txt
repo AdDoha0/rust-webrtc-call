@@ -2,3 +2,45 @@ POST /api/rooms - создать комнату
 GET /api/rooms - список активных комнат
 GET /api/rooms/{id} - информация о комнате
 DELETE /api/rooms/{id} - удалить комнату
+
+
+
+
+1. Работа с комнатами (Rooms)
+
+POST /rooms — создать комнату.
+Тело: { "name": "...", "is_active": true/false }
+Ответ: { "id": ..., "public_code": "AB12CD34", "created_at": ... }
+
+GET /rooms/{room_id} — получить информацию о комнате.
+
+GET /rooms/code/{public_code} — найти комнату по публичному коду (например, если участник подключается по приглашению).
+
+PATCH /rooms/{room_id} — изменить состояние комнаты (например, is_active=false, закрыть комнату).
+
+DELETE /rooms/{room_id} — удалить комнату (автоматически каскадно удаляются участники и сообщения).
+
+2. Работа с участниками (Participants)
+
+POST /rooms/{room_id}/participants — добавить участника в комнату.
+Тело: { "client_id": "...", "name": "...", "is_host": true/false }
+
+GET /rooms/{room_id}/participants — список участников комнаты.
+
+PATCH /participants/{participant_id} — изменить имя или флаг is_host.
+
+DELETE /participants/{participant_id} — удалить участника.
+
+3. Работа с чатом (Chat)
+
+POST /rooms/{room_id}/messages — отправить сообщение.
+Тело: { "sender_id": ..., "message": "..." }
+
+GET /rooms/{room_id}/messages — получить историю сообщений (с пагинацией: ?limit=50&offset=0).
+
+4. (Опционально для звонков/WebRTC)
+
+POST /rooms/{room_id}/signal — отправить сигнал (Offer, Answer, ICE candidate).
+Тело: { "sender_id": ..., "target_id": ..., "type": "offer/answer/ice", "data": {...} }
+
+GET /rooms/{room_id}/signal/subscribe — (WebSocket) получать сигналы в реальном времени.
