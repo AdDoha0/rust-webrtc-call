@@ -4,7 +4,7 @@ use axum::{
 };
 use sqlx::Error as SqlxError;
 use serde::Serialize;
-
+use tracing::error; 
 
 #[derive(Error, Debug)]
 pub enum DomainError {
@@ -30,13 +30,20 @@ pub enum DomainError {
 #[derive(Error, Debug)]
 pub enum InfrastructureError {
     #[error("Database error: {0}")]
-    DatabaseError(#[from] SqlxError),
+    DatabaseError(SqlxError),
 
     #[error("WebSocket connection error: {0}")]
     WsConnectionError(String),
 
     #[error("Internal server error")]
     InternalError,
+}
+
+impl From<SqlxError> for InfrastructureError {
+    fn from(e: SqlxError) -> Self {
+        error!("Database error: {}", e);
+        InfrastructureError::DatabaseError(e)
+    }
 }
 
 #[derive(Error, Debug)]

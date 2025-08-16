@@ -7,24 +7,37 @@ use crate::modules::rooms::{
         service_trait::RoomService
     }
 };
+use crate::modules::participants::{
+    repository::postgres::PostgresParticipantRepository,
+    service::{
+        service_impl::ParticipantServiceImpl,
+        service_trait::ParticipantService
+    }
+};
 
 
 #[derive(Clone)]
 pub struct Services {
     pub room: Arc<dyn RoomService + Send + Sync>,
+    pub participant: Arc<dyn ParticipantService + Send + Sync>,
 }
 
 
 impl Services {
     pub fn room(&self) -> &(dyn RoomService + Send + Sync) {
         &*self.room
-    }   
+    }
+    
+    pub fn participant(&self) -> &(dyn ParticipantService + Send + Sync) {
+        &*self.participant
+    }
 }
 
 
 pub struct ServiceBuilder {
     pub db_pool: PgPool,
     pub room: Option<Arc<dyn RoomService + Send + Sync>>,
+    pub participant: Option<Arc<dyn ParticipantService + Send + Sync>>,
 }
 
 
@@ -32,7 +45,8 @@ impl ServiceBuilder {
     pub fn new(db_pool: PgPool) -> Self {
         Self {
             db_pool,
-            room: None
+            room: None,
+            participant: None
         }
     }
 
@@ -52,8 +66,14 @@ impl ServiceBuilder {
             Arc::new(RoomServiceImpl::new(room_repository))
         });
 
+        let participant = self.participant.unwrap_or_else(|| {
+            let participant_repository = PostgresParticipantRepository::new(self.db_pool.clone());
+            Arc::new(ParticipantServiceImpl::new(participant_repository))
+        });
+
         Services {
             room,
+            participant,
         }
     }
 }

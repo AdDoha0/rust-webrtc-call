@@ -3,7 +3,8 @@ use std::sync::Arc;
 use tokio::sync::RwLock;
 
 use super::ws;
-use crate::app_state::AppState; 
+use crate::app_state::AppState;
+use crate::modules::{rooms, participants}; 
 
 async fn index() -> &'static str {
     "Signaling server is running" 
@@ -13,8 +14,14 @@ pub fn app_router(hub: AppState) -> Router<()> {
     Router::new()
         .route("/", get(index))
         .route("/ws", get(ws::handler::ws_handler))
-        // .nest("/rooms", rooms_routes())
+        .nest("/api", api_routes())
         .with_state(hub.clone())
+}
+
+fn api_routes() -> Router<AppState> {
+    Router::new()
+        .nest("/", rooms::routes::routes())
+        .nest("/", participants::routes::routes())
 }
 
 // fn rooms_routes() -> Router<AppState> {

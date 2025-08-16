@@ -35,7 +35,7 @@ async fn handle_socket(socket: WebSocket, hub: AppState, room_id: String) {
     let (tx, mut rx) = mpsc::unbounded_channel::<WsMessage>();
 
     {
-        let mut hub_write = hub.hub.write().await;
+        let mut hub_write = hub.hub().write().await;
         hub_write.add_client(&room_id, client_id, tx);
     }
 
@@ -57,7 +57,7 @@ async fn handle_socket(socket: WebSocket, hub: AppState, room_id: String) {
                 tracing::info!("Received from {}: {}", client_id, text);
 
                 if let Ok(signal) = serde_json::from_str::<SignalMessage>(&text) {
-                    let hub_read = hub.hub.read().await;
+                    let hub_read = hub.hub().read().await;
                     match signal {
                         SignalMessage::Chat { target, .. } => {
                             if let Some(target_id) = target {
@@ -83,7 +83,7 @@ async fn handle_socket(socket: WebSocket, hub: AppState, room_id: String) {
     }
 
     {
-        let mut hub_write = hub.hub.write().await;
+        let mut hub_write = hub.hub().write().await;
         hub_write.remove_client(&room_id, &client_id);
     }
 

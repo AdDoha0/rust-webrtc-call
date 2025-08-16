@@ -1,6 +1,6 @@
-/home/user/my_projects/call_WebRtc/signaling/target/debug/deps/signaling-1b7b8fb8f5931a82.d: src/main.rs src/ws/mod.rs src/ws/handler.rs src/ws/hub.rs src/ws/message.rs src/router.rs src/app_state.rs src/common/mod.rs src/common/error.rs src/common/response.rs src/modules/mod.rs src/modules/rooms/mod.rs src/modules/rooms/entity.rs src/modules/rooms/dto/mod.rs src/modules/rooms/dto/input.rs src/modules/rooms/dto/output.rs src/modules/rooms/repository/mod.rs src/modules/rooms/repository/postgres.rs src/modules/rooms/repository/repository_trait.rs src/modules/rooms/service/mod.rs src/modules/rooms/service/service_impl.rs src/modules/rooms/service/service_trait.rs src/modules/rooms/handler.rs src/container.rs
+/home/user/my_projects/call_WebRtc/signaling/target/debug/deps/signaling-1b7b8fb8f5931a82.d: src/main.rs src/ws/mod.rs src/ws/handler.rs src/ws/hub.rs src/ws/message.rs src/router.rs src/app_state.rs src/common/mod.rs src/common/error.rs src/common/response.rs src/modules/mod.rs src/modules/rooms/mod.rs src/modules/rooms/entity.rs src/modules/rooms/dto/mod.rs src/modules/rooms/dto/input.rs src/modules/rooms/dto/output.rs src/modules/rooms/repository/mod.rs src/modules/rooms/repository/postgres.rs src/modules/rooms/repository/repository_trait.rs src/modules/rooms/service/mod.rs src/modules/rooms/service/service_impl.rs src/modules/rooms/service/service_trait.rs src/modules/rooms/handlers.rs src/modules/rooms/routes.rs src/modules/participants/mod.rs src/modules/participants/entity.rs src/modules/participants/dto/mod.rs src/modules/participants/dto/input.rs src/modules/participants/dto/output.rs src/modules/participants/repository/mod.rs src/modules/participants/repository/repository_trait.rs src/modules/participants/repository/postgres.rs src/modules/participants/service/mod.rs src/modules/participants/service/service_trait.rs src/modules/participants/service/service_impl.rs src/modules/participants/handlers.rs src/modules/participants/routes.rs src/container.rs
 
-/home/user/my_projects/call_WebRtc/signaling/target/debug/deps/libsignaling-1b7b8fb8f5931a82.rmeta: src/main.rs src/ws/mod.rs src/ws/handler.rs src/ws/hub.rs src/ws/message.rs src/router.rs src/app_state.rs src/common/mod.rs src/common/error.rs src/common/response.rs src/modules/mod.rs src/modules/rooms/mod.rs src/modules/rooms/entity.rs src/modules/rooms/dto/mod.rs src/modules/rooms/dto/input.rs src/modules/rooms/dto/output.rs src/modules/rooms/repository/mod.rs src/modules/rooms/repository/postgres.rs src/modules/rooms/repository/repository_trait.rs src/modules/rooms/service/mod.rs src/modules/rooms/service/service_impl.rs src/modules/rooms/service/service_trait.rs src/modules/rooms/handler.rs src/container.rs
+/home/user/my_projects/call_WebRtc/signaling/target/debug/deps/libsignaling-1b7b8fb8f5931a82.rmeta: src/main.rs src/ws/mod.rs src/ws/handler.rs src/ws/hub.rs src/ws/message.rs src/router.rs src/app_state.rs src/common/mod.rs src/common/error.rs src/common/response.rs src/modules/mod.rs src/modules/rooms/mod.rs src/modules/rooms/entity.rs src/modules/rooms/dto/mod.rs src/modules/rooms/dto/input.rs src/modules/rooms/dto/output.rs src/modules/rooms/repository/mod.rs src/modules/rooms/repository/postgres.rs src/modules/rooms/repository/repository_trait.rs src/modules/rooms/service/mod.rs src/modules/rooms/service/service_impl.rs src/modules/rooms/service/service_trait.rs src/modules/rooms/handlers.rs src/modules/rooms/routes.rs src/modules/participants/mod.rs src/modules/participants/entity.rs src/modules/participants/dto/mod.rs src/modules/participants/dto/input.rs src/modules/participants/dto/output.rs src/modules/participants/repository/mod.rs src/modules/participants/repository/repository_trait.rs src/modules/participants/repository/postgres.rs src/modules/participants/service/mod.rs src/modules/participants/service/service_trait.rs src/modules/participants/service/service_impl.rs src/modules/participants/handlers.rs src/modules/participants/routes.rs src/container.rs
 
 src/main.rs:
 src/ws/mod.rs:
@@ -24,5 +24,19 @@ src/modules/rooms/repository/repository_trait.rs:
 src/modules/rooms/service/mod.rs:
 src/modules/rooms/service/service_impl.rs:
 src/modules/rooms/service/service_trait.rs:
-src/modules/rooms/handler.rs:
+src/modules/rooms/handlers.rs:
+src/modules/rooms/routes.rs:
+src/modules/participants/mod.rs:
+src/modules/participants/entity.rs:
+src/modules/participants/dto/mod.rs:
+src/modules/participants/dto/input.rs:
+src/modules/participants/dto/output.rs:
+src/modules/participants/repository/mod.rs:
+src/modules/participants/repository/repository_trait.rs:
+src/modules/participants/repository/postgres.rs:
+src/modules/participants/service/mod.rs:
+src/modules/participants/service/service_trait.rs:
+src/modules/participants/service/service_impl.rs:
+src/modules/participants/handlers.rs:
+src/modules/participants/routes.rs:
 src/container.rs:

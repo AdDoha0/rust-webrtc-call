@@ -22,9 +22,13 @@ fn init_logging() {
         .unwrap_or_else(|_| {
             EnvFilter::new("info")
                 .add_directive("rooms=debug".parse().unwrap())
-                .add_directive("rooms::handler=info".parse().unwrap())
+                .add_directive("rooms::handlers=info".parse().unwrap())
                 .add_directive("rooms::service=debug".parse().unwrap())
                 .add_directive("rooms::repository=debug".parse().unwrap())
+                .add_directive("participants=debug".parse().unwrap())
+                .add_directive("participants::handlers=info".parse().unwrap())
+                .add_directive("participants::service=debug".parse().unwrap())
+                .add_directive("participants::repository=debug".parse().unwrap())
                 .add_directive("sqlx=warn".parse().unwrap())
         });
 
