@@ -13,6 +13,7 @@ mod router;
 mod app_state;
 mod common;
 mod modules;
+mod container;
 
 
 
@@ -45,13 +46,10 @@ async fn main() {
         .await
         .expect("Failed to connect to Postgres");
 
+    let app = app_router(AppState::new(db_pool, hub));
 
-    let app = app_router(AppState { hub: hub, db_pool: db_pool });
-
-    // Базовый роутер c health-check
     info!("Listening on {}", addr);
 
-    // Запуск сервера (Axum 0.8)
     let listener = tokio::net::TcpListener::bind(addr)
         .await
         .expect("Failed to bind address");
