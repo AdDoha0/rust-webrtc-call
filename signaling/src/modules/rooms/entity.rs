@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use sqlx::types::chrono::NaiveDateTime;
-
+use tracing::debug;
 
 use super::dto::{
     input::CreateRoomDto,
@@ -27,6 +27,7 @@ pub struct NewRoom {
 
 impl From<CreateRoomDto> for NewRoom{
     fn from(dto: CreateRoomDto) -> Self {
+        debug!("Converting CreateRoomDto to NewRoom: {}", dto.name);
         Self {
             name: dto.name,
             public_code: String::new(),
@@ -36,13 +37,14 @@ impl From<CreateRoomDto> for NewRoom{
 }
 
 impl From<Room> for RoomResponseDto  {
-    fn from(tb: Room) -> Self {
+    fn from(room: Room) -> Self {
+        debug!("Converting Room to RoomResponseDto: {} (id: {})", room.name, room.id);
         Self {
-            id: tb.id,
-            name: tb.name,
-            public_code: tb.public_code,
-            is_active: tb.is_active,
-            created_at: tb.created_at
+            id: room.id,
+            name: room.name,
+            public_code: room.public_code,
+            is_active: room.is_active,
+            created_at: room.created_at
         }
     }
 }

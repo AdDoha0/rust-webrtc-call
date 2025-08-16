@@ -1,73 +1,78 @@
-// use axum::{
-//     extract::{Path, State},
-//     http::StatusCode,
-//     Json,
-// };
-// use uuid::Uuid;
-// use crate::{
-//     app_state::AppState,
-//     modules::rooms::{
-//         service::RoomService,
-//         dto::{
-//             input::{CreateRoomRequest, UpdateRoomRequest, RoomId, PublicCode},
-//             output::{RoomResponse, CreateRoomResponse},
-//         },
-//     },
-//     common::error::AppError,
-// };
+use axum::{extract::{State, Path}, response::IntoResponse, Json};
+use tracing::{info, warn, error, instrument, Span};
 
-// pub async fn create_room(
-//     State(state): State<AppState>,
-//     Json(request): Json<CreateRoomRequest>,
-// ) -> Result<Json<CreateRoomResponse>, AppError> {
-//     let repository = crate::modules::rooms::repository::RoomRepository::new(state.db_pool);
-//     let service = RoomService::new(repository);
-    
-//     let response = service.create_room(request).await?;
-//     Ok(Json(response))
-// }
+use crate::{
+    AppState,
+    common::error::AppError,
+    common::response::ApiResponse,
+};
+use super::dto::{
+    input::{CreateRoomDto, UpdateRoomDto},
+};
 
-// pub async fn get_room_by_id(
-//     State(state): State<AppState>,
-//     Path(room_id): Path<Uuid>,
-// ) -> Result<Json<RoomResponse>, AppError> {
-//     let repository = crate::modules::rooms::repository::RoomRepository::new(state.db_pool);
-//     let service = RoomService::new(repository);
+#[instrument(skip(state), fields(room_name = payload.name.as_str()))]
+pub async fn create_room_handler (
+    State(state): State<AppState>,
+    Json(payload): Json<CreateRoomDto>,
+) -> Result<impl IntoResponse, AppError> {
+    info!("Creating new room with name: {}", payload.name);
     
-//     let response = service.get_room_by_id(RoomId(room_id)).await?;
-//     Ok(Json(response))
-// }
+    let result = state.services().room().create_room(payload).await?;
+    
+    info!("Room created successfully with id: {}", result.id);
+    Ok(ApiResponse::success(result))
+}
 
-// pub async fn get_room_by_public_code(
-//     State(state): State<AppState>,
-//     Path(public_code): Path<String>,
-// ) -> Result<Json<RoomResponse>, AppError> {
-//     let repository = crate::modules::rooms::repository::RoomRepository::new(state.db_pool);
-//     let service = RoomService::new(repository);
+#[instrument(skip(state), fields(room_id = id))]
+pub async fn get_room_handler(
+    State(state): State<AppState>,
+    Path(id): Path<i32>,
+) -> Result<impl IntoResponse, AppError> {
+    info!("Fetching room by id: {}", id);
     
-//     let response = service.get_room_by_public_code(PublicCode(public_code)).await?;
-//     Ok(Json(response))
-// }
+    let result = state.services().room().get_room_by_id(id).await?;
+    
+    info!("Room retrieved successfully: {}", result.name);
+    Ok(ApiResponse::success(result))
+}
 
-// pub async fn update_room(
-//     State(state): State<AppState>,
-//     Path(room_id): Path<Uuid>,
-//     Json(request): Json<UpdateRoomRequest>,
-// ) -> Result<Json<RoomResponse>, AppError> {
-//     let repository = crate::modules::rooms::repository::RoomRepository::new(state.db_pool);
-//     let service = RoomService::new(repository);
+#[instrument(skip(state), fields(public_code = public_code))]
+pub async fn get_room_by_public_code_handler(
+    State(state): State<AppState>,
+    Path(public_code): Path<&str>,
+) -> Result<impl IntoResponse, AppError> {
+    info!("Fetching room by public code: {}", public_code);
     
-//     let response = service.update_room(RoomId(room_id), request).await?;
-//     Ok(Json(response))
-// }
+    let result = state.services().room().get_room_by_public_code(public_code).await?;
+    
+    info!("Room retrieved successfully by public code: {}", result.name);
+    Ok(ApiResponse::success(result))
+}
 
-// pub async fn delete_room(
-//     State(state): State<AppState>,
-//     Path(room_id): Path<Uuid>,
-// ) -> Result<StatusCode, AppError> {
-//     let repository = crate::modules::rooms::repository::RoomRepository::new(state.db_pool);
-//     let service = RoomService::new(repository);
+#[instrument(skip(state), fields(room_id = id))]
+pub async fn update_room_handler(
+    State(state): State<AppState>,
+    Path(id): Path<i32>,
+    Json(dto): Json<UpdateRoomDto>,
+) -> Result<impl IntoResponse, AppError> {
+    info!("Updating room with id: {}", id);
     
-//     service.delete_room(RoomId(room_id)).await?;
-//     Ok(StatusCode::NO_CONTENT)
-// } 
+    let result = state.services().room().update_room(id, dto).await?;
+    
+    info!("Room updated successfully: {}", result.name);
+    Ok(ApiResponse::success(result))
+}
+
+#[instrument(skip(state), fields(room_id = id))]
+pub async fn delete_room_handler(
+    State(state): State<AppState>,
+    Path(id): Path<i32>
+) -> Result<impl IntoResponse, AppError> { 
+    info!("Deleting room with id: {}", id);
+    
+    state.services().room().delete_room(id).await?; 
+    
+    info!("Room deleted successfully");
+    Ok(ApiResponse::message("deleted"))
+}
+

@@ -1,5 +1,6 @@
 use std::{net::SocketAddr, sync::Arc};
-use tracing::info;
+use tracing::{info, Level};
+use tracing_subscriber::{fmt, EnvFilter};
 use axum::{Router, routing::get};
 use tokio::sync::RwLock;
 use sqlx::PgPool;
@@ -15,13 +16,35 @@ mod common;
 mod modules;
 mod container;
 
+fn init_logging() {
+    // Настройка логирования с фильтрацией по уровням
+    let filter = EnvFilter::try_from_default_env()
+        .unwrap_or_else(|_| {
+            EnvFilter::new("info")
+                .add_directive("rooms=debug".parse().unwrap())
+                .add_directive("rooms::handler=info".parse().unwrap())
+                .add_directive("rooms::service=debug".parse().unwrap())
+                .add_directive("rooms::repository=debug".parse().unwrap())
+                .add_directive("sqlx=warn".parse().unwrap())
+        });
 
+    tracing_subscriber::fmt()
+        .with_env_filter(filter)
+        .with_target(true)
+        .with_thread_ids(true)
+        .with_thread_names(true)
+        .with_file(true)
+        .with_line_number(true)
+        .init();
+}
 
 #[tokio::main]
 async fn main() {
     // Загрузим переменные окружения, если есть .env
     let _ = dotenvy::dotenv();
-    tracing_subscriber::fmt::init();
+    
+    // Инициализируем логирование
+    init_logging();
 
     info!("Starting signaling server...");
 
@@ -42,9 +65,11 @@ async fn main() {
     dotenv::dotenv().ok(); 
     let database_url = env::var("DATABASE_URL").expect("Connect database url!");
 
+    info!("Connecting to database...");
     let db_pool = PgPool::connect(&database_url)
         .await
         .expect("Failed to connect to Postgres");
+    info!("Database connection established successfully");
 
     let app = app_router(AppState::new(db_pool, hub));
 
