@@ -29,6 +29,10 @@ fn init_logging() {
                 .add_directive("participants::handlers=info".parse().unwrap())
                 .add_directive("participants::service=debug".parse().unwrap())
                 .add_directive("participants::repository=debug".parse().unwrap())
+                .add_directive("chat=debug".parse().unwrap())
+                .add_directive("chat::handlers=info".parse().unwrap())
+                .add_directive("chat::service=debug".parse().unwrap())
+                .add_directive("chat::repository=debug".parse().unwrap())
                 .add_directive("sqlx=warn".parse().unwrap())
         });
 

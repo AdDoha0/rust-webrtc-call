@@ -14,12 +14,20 @@ use crate::modules::participants::{
         service_trait::ParticipantService
     }
 };
+use crate::modules::chat::{
+    repository::postgres::PostgresChatRepository,
+    service::{
+        service_impl::ChatServiceImpl,
+        service_trait::ChatService
+    }
+};
 
 
 #[derive(Clone)]
 pub struct Services {
     pub room: Arc<dyn RoomService + Send + Sync>,
     pub participant: Arc<dyn ParticipantService + Send + Sync>,
+    pub chat: Arc<dyn ChatService + Send + Sync>,
 }
 
 
@@ -31,6 +39,10 @@ impl Services {
     pub fn participant(&self) -> &(dyn ParticipantService + Send + Sync) {
         &*self.participant
     }
+    
+    pub fn chat(&self) -> &(dyn ChatService + Send + Sync) {
+        &*self.chat
+    }
 }
 
 
@@ -38,6 +50,7 @@ pub struct ServiceBuilder {
     pub db_pool: PgPool,
     pub room: Option<Arc<dyn RoomService + Send + Sync>>,
     pub participant: Option<Arc<dyn ParticipantService + Send + Sync>>,
+    pub chat: Option<Arc<dyn ChatService + Send + Sync>>,
 }
 
 
@@ -46,7 +59,8 @@ impl ServiceBuilder {
         Self {
             db_pool,
             room: None,
-            participant: None
+            participant: None,
+            chat: None
         }
     }
 
@@ -71,9 +85,15 @@ impl ServiceBuilder {
             Arc::new(ParticipantServiceImpl::new(participant_repository))
         });
 
+        let chat = self.chat.unwrap_or_else(|| {
+            let chat_repository = PostgresChatRepository::new(self.db_pool.clone());
+            Arc::new(ChatServiceImpl::new(chat_repository))
+        });
+
         Services {
             room,
             participant,
+            chat,
         }
     }
 }

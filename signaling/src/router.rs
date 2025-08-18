@@ -4,24 +4,36 @@ use tokio::sync::RwLock;
 
 use super::ws;
 use crate::app_state::AppState;
-use crate::modules::{rooms, participants}; 
+use crate::modules::{rooms, participants, chat}; 
 
 async fn index() -> &'static str {
     "Signaling server is running" 
 }
 
-pub fn app_router(hub: AppState) -> Router<()> {
+pub fn app_router(state: AppState) -> Router<AppState> {
     Router::new()
         .route("/", get(index))
         .route("/ws", get(ws::handler::ws_handler))
         .nest("/api", api_routes())
-        .with_state(hub.clone())
+        .with_state(state)
 }
 
 fn api_routes() -> Router<AppState> {
+    let api_version = "/v1";
+
     Router::new()
-        .nest("/", rooms::routes::routes())
-        .nest("/", participants::routes::routes())
+        .nest(
+            &format!("{api_version}"),
+            rooms::routes::routes()
+        )
+        .nest(
+            &format!("{api_version}"),
+            participants::routes::routes()
+        )
+        .nest(
+            &format!("{api_version}"),
+            chat::routes::routes()
+        )
 }
 
 // fn rooms_routes() -> Router<AppState> {
