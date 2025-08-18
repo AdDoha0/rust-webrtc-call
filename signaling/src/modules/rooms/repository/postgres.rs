@@ -1,4 +1,6 @@
 use sqlx::{QueryBuilder, Postgres, PgPool};
+use sqlx::Error as SqlxError;
+
 use async_trait::async_trait;
 use tracing::{error, instrument};
 
@@ -28,7 +30,7 @@ impl RoomRepository for PostgresRoomRepository {
             r#"
             INSERT INTO rooms (name, public_code, is_active)
             VALUES ($1, $2, $3)
-            RETURNING id, name, public_code, is_active, created_at, updated_at
+            RETURNING id, name, public_code, is_active, created_at
             "#,
             dto.name,
             dto.public_code,
@@ -45,7 +47,7 @@ impl RoomRepository for PostgresRoomRepository {
         let result = sqlx::query_as!(
             Room,
             r#"
-            SELECT id, name, public_code, is_active, created_at, updated_at
+            SELECT id, name, public_code, is_active, created_at
             FROM rooms
             WHERE id = $1
             "#,
@@ -57,11 +59,11 @@ impl RoomRepository for PostgresRoomRepository {
         Ok(result)
     }
 
-    async fn select_room_by_public_code(&self, public_code: &str) -> Result<Option<Room>, AppError> {
+    async fn select_room_by_public_code(&self, public_code: String) -> Result<Option<Room>, AppError> {
         let result = sqlx::query_as!(
             Room,
             r#"
-            SELECT id, name, public_code, is_active, created_at, updated_at
+            SELECT id, name, public_code, is_active, created_at
             FROM rooms
             WHERE public_code = $1
             "#,
@@ -81,7 +83,7 @@ impl RoomRepository for PostgresRoomRepository {
                 name = COALESCE($1, name),
                 is_active = COALESCE($2, is_active)
             WHERE id = $3
-            RETURNING id, name, public_code, is_active, created_at, updated_at
+            RETURNING id, name, public_code, is_active, created_at
             "#,
             dto.name,
             dto.is_active,

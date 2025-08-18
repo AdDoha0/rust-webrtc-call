@@ -67,10 +67,10 @@ where
         }
     }
 
-    async fn get_room_by_public_code(&self, public_code: &str) -> Result<RoomResponseDto, AppError> {
+    async fn get_room_by_public_code(&self, public_code: String) -> Result<RoomResponseDto, AppError> {
         debug!(target: ROOM_SERVICE_LOG_TARGET, "Fetching room by public_code: {}", public_code);
 
-        let room = self.repository.select_room_by_public_code(public_code).await?;
+        let room = self.repository.select_room_by_public_code(public_code.clone()).await?;
         match room {
             Some(r) => {
                 let response: RoomResponseDto = r.into();

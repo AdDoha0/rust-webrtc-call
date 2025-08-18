@@ -1,0 +1,1 @@
+for<'a> RouterIntoService<_, AppState>: tower_service::Service<IncomingStream<'a, tokio::net::TcpListener>>

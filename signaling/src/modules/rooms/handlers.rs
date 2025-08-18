@@ -40,7 +40,7 @@ pub async fn get_room_handler(
 #[instrument(skip(state), fields(public_code = public_code))]
 pub async fn get_room_by_public_code_handler(
     State(state): State<AppState>,
-    Path(public_code): Path<&str>,
+    Path(public_code): Path<String>,
 ) -> Result<impl IntoResponse, AppError> {
     info!("Fetching room by public code: {}", public_code);
     

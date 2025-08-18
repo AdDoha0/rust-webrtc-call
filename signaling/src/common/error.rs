@@ -46,13 +46,27 @@ impl From<SqlxError> for InfrastructureError {
     }
 }
 
+impl From<InfrastructureError> for AppError {
+    fn from(err: InfrastructureError) -> Self {
+        AppError::Infrastructure(err)
+    }
+}
+
+impl From<SqlxError> for AppError {
+    fn from(e: SqlxError) -> Self {
+        AppError::Infrastructure(InfrastructureError::from(e))
+    }
+}
+
+
+
 #[derive(Error, Debug)]
 pub enum AppError {
     #[error(transparent)]
     Domain(#[from] DomainError),
 
     #[error(transparent)]
-    Infrastructure(#[from] InfrastructureError),
+    Infrastructure(InfrastructureError),
 }
 
 #[derive(Serialize)]

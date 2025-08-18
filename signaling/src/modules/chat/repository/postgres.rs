@@ -77,11 +77,8 @@ impl ChatRepository for PostgresChatRepository {
             room_id
         )
         .fetch_one(&self.pool)
-        .await
-        .map_err(|e| {
-            error!("Failed to count messages: {}", e);
-            InfrastructureError::DatabaseError(e).into()
-        })?;
+        .await?
+        .unwrap_or(0);
 
         debug!("Total messages count for room {}: {}", room_id, count);
         Ok(count)

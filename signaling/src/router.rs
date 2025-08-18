@@ -10,7 +10,7 @@ async fn index() -> &'static str {
     "Signaling server is running" 
 }
 
-pub fn app_router(state: AppState) -> Router<AppState> {
+pub fn app_router(state: AppState) -> Router {
     Router::new()
         .route("/", get(index))
         .route("/ws", get(ws::handler::ws_handler))

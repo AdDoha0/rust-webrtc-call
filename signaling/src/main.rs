@@ -79,7 +79,9 @@ async fn main() {
         .expect("Failed to connect to Postgres");
     info!("Database connection established successfully");
 
-    let app = app_router(AppState::new(db_pool, hub));
+    let state = AppState::new(db_pool, hub);
+    let app = app_router(state);
+
 
     info!("Listening on {}", addr);
 
@@ -90,6 +92,7 @@ async fn main() {
     axum::serve(listener, app)
         .await
         .expect("Server error");
+
 }
 
 

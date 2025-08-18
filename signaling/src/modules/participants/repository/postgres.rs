@@ -77,7 +77,7 @@ impl ParticipantRepository for PostgresParticipantRepository {
             Participant,
             r#"
             UPDATE participants
-            SET name = COALESCE($1, name) is_host = COALESCE($2, is_host)
+            SET name = COALESCE($1, name), is_host = COALESCE($2, is_host)
             WHERE id = $3
             RETURNING id, room_id, client_id, name, is_host
             "#,
@@ -88,7 +88,7 @@ impl ParticipantRepository for PostgresParticipantRepository {
         .fetch_optional(&self.pool)
         .await?;
 
-        Ok(Some(result))
+        Ok(result)
     }
 
     async fn delete_participant_by_id(&self, id: i32) -> Result<u64, AppError> {
