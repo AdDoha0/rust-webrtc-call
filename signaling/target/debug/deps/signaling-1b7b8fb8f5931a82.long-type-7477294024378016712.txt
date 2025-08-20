@@ -1,0 +1,2 @@
+fn(axum::extract::State<AppState>, {type error}, axum::Json<CreateMessageDto>) -> impl futures_util::Future<Output = Result<impl IntoResponse, AppError>> {chat::handlers::create_message_handler}
+fn(axum::extract::State<AppState>, {type error}, axum::Json<CreateMessageDto>) -> impl futures_util::Future<Output = Result<impl IntoResponse, AppError>> {chat::handlers::create_message_handler}: Handler<_, AppState>

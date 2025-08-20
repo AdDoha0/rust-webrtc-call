@@ -2,7 +2,7 @@ use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 pub struct CreateMessageDto {
-    pub room_id: i32,
+    // pub room_id: i32,
     pub sender_id: i32,
     pub message: String,
 }

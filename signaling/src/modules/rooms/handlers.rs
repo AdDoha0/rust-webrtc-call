@@ -22,7 +22,7 @@ pub async fn create_room_handler (
     let result = state.services().room().create_room(payload).await?;
     
     info!("Room created successfully with id: {}", result.id);
-    Ok(ApiResponse::success(result))
+    Ok(ApiResponse::created(result))
 }
 
 #[instrument(skip(state), fields(room_id = id.value))]
@@ -75,6 +75,6 @@ pub async fn delete_room_handler(
     state.services().room().delete_room(id.value).await?; 
     
     info!("Room deleted successfully");
-    Ok(ApiResponse::message("deleted"))
+    Ok(ApiResponse::no_content())
 }
 

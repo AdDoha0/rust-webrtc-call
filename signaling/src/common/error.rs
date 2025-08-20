@@ -1,19 +1,21 @@
 use thiserror::Error;
 use axum::{
-    http::StatusCode, response::{IntoResponse, Response}, Json
+    http::StatusCode,
+    response::{IntoResponse, Response},
+    Json,
+    extract::rejection::{PathRejection, JsonRejection},
 };
 use sqlx::Error as SqlxError;
 use serde::Serialize;
-use tracing::error; 
-use axum::extract::rejection::PathRejection;
+use tracing::error;
+
+// ===== Errors =====
 
 #[derive(Error, Debug)]
 pub enum PathError {
     #[error("Invalid ID: {0}")]
-    InvalidId(String)
+    InvalidId(String),
 }
-
-
 
 #[derive(Error, Debug)]
 pub enum DomainError {
@@ -34,6 +36,9 @@ pub enum DomainError {
 
     #[error("Invalid message format")]
     InvalidMessageFormat,
+
+    #[error("Invalid JSON: {0}")]
+    InvalidJson(String),
 }
 
 #[derive(Error, Debug)]
@@ -48,31 +53,6 @@ pub enum InfrastructureError {
     InternalError,
 }
 
-impl From<SqlxError> for InfrastructureError {
-    fn from(e: SqlxError) -> Self {
-        error!("Database error: {}", e);
-        InfrastructureError::DatabaseError(e)
-    }
-}
-
-impl From<InfrastructureError> for AppError {
-    fn from(err: InfrastructureError) -> Self {
-        AppError::Infrastructure(err)
-    }
-}
-
-impl From<SqlxError> for AppError {
-    fn from(e: SqlxError) -> Self {
-        AppError::Infrastructure(InfrastructureError::from(e))
-    }
-}
-
-impl From<PathRejection> for AppError {
-    fn from(err: PathRejection) -> Self {
-        AppError::PathError(PathError::InvalidId(err.to_string()))
-    }
-}
-
 #[derive(Error, Debug)]
 pub enum AppError {
     #[error(transparent)]
@@ -82,8 +62,49 @@ pub enum AppError {
     Infrastructure(InfrastructureError),
 
     #[error(transparent)]
-    PathError(PathError)
+    PathError(PathError),
 }
+
+// ===== From conversions with logging =====
+
+impl From<SqlxError> for InfrastructureError {
+    fn from(e: SqlxError) -> Self {
+        error!("Database error: {}", e);
+        InfrastructureError::DatabaseError(e)
+    }
+}
+
+impl From<InfrastructureError> for AppError {
+    fn from(err: InfrastructureError) -> Self {
+        error!("Infrastructure error: {:?}", err);
+        AppError::Infrastructure(err)
+    }
+}
+
+impl From<SqlxError> for AppError {
+    fn from(e: SqlxError) -> Self {
+        error!("Database error converted to AppError: {}", e);
+        AppError::Infrastructure(InfrastructureError::from(e))
+    }
+}
+
+impl From<PathRejection> for AppError {
+    fn from(err: PathRejection) -> Self {
+        error!("Path parsing error: {}", err);
+        AppError::PathError(PathError::InvalidId(err.to_string()))
+    }
+}
+
+impl From<JsonRejection> for AppError {
+    fn from(err: JsonRejection) -> Self {
+        // Получаем сообщение об ошибке в виде строки
+        let msg = err.to_string();
+        error!("JSON deserialization error: {}", msg);
+        AppError::Domain(DomainError::InvalidJson(msg))
+    }
+}
+
+// ===== Error Response =====
 
 #[derive(Serialize)]
 struct ErrorResponse {
@@ -91,33 +112,33 @@ struct ErrorResponse {
     pub r#type: String,
 }
 
+// ===== IntoResponse =====
+
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         match self {
             AppError::Domain(domain) => {
-                let (status, r#type) = match domain {
-                    DomainError::UserNotFound(_) => (StatusCode::NOT_FOUND, "UserNotFound"),
-                    DomainError::RoomNotFound(_) => (StatusCode::NOT_FOUND, "RoomNotFound"),
-                    DomainError::NotFound(_) => (StatusCode::NOT_FOUND, "NotFound"),
-                    DomainError::AuthenticationError => (StatusCode::UNAUTHORIZED, "AuthenticationError"),
-                    DomainError::Unauthorized => (StatusCode::FORBIDDEN, "Unauthorized"),
-                    DomainError::InvalidMessageFormat => (StatusCode::BAD_REQUEST, "InvalidMessageFormat"),
+                let (status, r#type, msg) = match domain {
+                    DomainError::UserNotFound(s) => (StatusCode::NOT_FOUND, "UserNotFound", s),
+                    DomainError::RoomNotFound(s) => (StatusCode::NOT_FOUND, "RoomNotFound", s),
+                    DomainError::NotFound(s) => (StatusCode::NOT_FOUND, "NotFound", s),
+                    DomainError::AuthenticationError => (StatusCode::UNAUTHORIZED, "AuthenticationError", domain.to_string()),
+                    DomainError::Unauthorized => (StatusCode::FORBIDDEN, "Unauthorized", domain.to_string()),
+                    DomainError::InvalidMessageFormat => (StatusCode::UNPROCESSABLE_ENTITY, "InvalidMessageFormat", domain.to_string()),
+                    DomainError::InvalidJson(s) => (StatusCode::UNPROCESSABLE_ENTITY, "InvalidJson", s),
                 };
-                let body = Json(ErrorResponse { error: domain.to_string(), r#type: r#type.to_string() });
+                let body = Json(ErrorResponse { error: msg, r#type: r#type.to_string() });
                 (status, body).into_response()
             }
 
             AppError::PathError(path_err) => {
-                let (status, r#type) = match path_err {
-                    PathError::InvalidId(_) => (StatusCode::BAD_REQUEST, "BadRequest"),
+                let (status, r#type, msg) = match path_err {
+                    PathError::InvalidId(s) => (StatusCode::BAD_REQUEST, "BadRequest", s),
                 };
-                let body = Json(ErrorResponse { 
-                    error: path_err.to_string(), 
-                    r#type: r#type.to_string() 
-                });
+                let body = Json(ErrorResponse { error: msg, r#type: r#type.to_string() });
                 (status, body).into_response()
             }
-            
+
             AppError::Infrastructure(infra) => {
                 let (status, r#type, msg) = match infra {
                     InfrastructureError::DatabaseError(err) => match err {
@@ -140,16 +161,3 @@ impl IntoResponse for AppError {
         }
     }
 }
-
-
-
-// use axum::extract::Path;
-
-// async fn get_room_handler(path: Result<Path<i32>, axum::extract::rejection::PathRejection>) -> Result<Json<RoomResponseDto>, AppError> {
-//     let room_id = match path {
-//         Ok(Path(id)) => id,
-//         Err(_) => return Err(DomainError::InvalidRoomId("Room id must be a number".to_string()).into()),
-//     };
-
-//     // дальше обычная логика поиска комнаты
-// }
