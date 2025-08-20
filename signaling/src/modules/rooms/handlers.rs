@@ -5,6 +5,7 @@ use crate::{
     AppState,
     common::error::AppError,
     common::response::ApiResponse,
+    common::extractors::resource_id::ResourceId,
 };
 use super::dto::{
     input::{CreateRoomDto, UpdateRoomDto},
@@ -24,14 +25,14 @@ pub async fn create_room_handler (
     Ok(ApiResponse::success(result))
 }
 
-#[instrument(skip(state), fields(room_id = id))]
+#[instrument(skip(state), fields(room_id = id.value))]
 pub async fn get_room_handler(
     State(state): State<AppState>,
-    Path(id): Path<i32>,
+    id: ResourceId<i32>,
 ) -> Result<impl IntoResponse, AppError> {
-    info!("Fetching room by id: {}", id);
+    info!("Fetching room by id: {}", id.value);
     
-    let result = state.services().room().get_room_by_id(id).await?;
+    let result = state.services().room().get_room_by_id(id.value).await?;
     
     info!("Room retrieved successfully: {}", result.name);
     Ok(ApiResponse::success(result))
@@ -50,28 +51,28 @@ pub async fn get_room_by_public_code_handler(
     Ok(ApiResponse::success(result))
 }
 
-#[instrument(skip(state), fields(room_id = id))]
+#[instrument(skip(state), fields(room_id = id.value))]
 pub async fn update_room_handler(
     State(state): State<AppState>,
-    Path(id): Path<i32>,
+    id: ResourceId<i32>,
     Json(dto): Json<UpdateRoomDto>,
 ) -> Result<impl IntoResponse, AppError> {
-    info!("Updating room with id: {}", id);
-    
-    let result = state.services().room().update_room(id, dto).await?;
+    info!("Updating room with id: {}", id.value);
+     
+    let result = state.services().room().update_room(id.value, dto).await?;
     
     info!("Room updated successfully: {}", result.name);
     Ok(ApiResponse::success(result))
 }
 
-#[instrument(skip(state), fields(room_id = id))]
+#[instrument(skip(state), fields(room_id = id.value))]
 pub async fn delete_room_handler(
     State(state): State<AppState>,
-    Path(id): Path<i32>
+    id: ResourceId<i32>,
 ) -> Result<impl IntoResponse, AppError> { 
-    info!("Deleting room with id: {}", id);
+    info!("Deleting room with id: {}", id.value);
     
-    state.services().room().delete_room(id).await?; 
+    state.services().room().delete_room(id.value).await?; 
     
     info!("Room deleted successfully");
     Ok(ApiResponse::message("deleted"))

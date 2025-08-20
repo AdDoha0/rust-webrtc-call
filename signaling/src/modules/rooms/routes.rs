@@ -5,10 +5,8 @@ use super::handlers::*;
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/rooms", post(create_room_handler))
-        .route("/rooms/id/{id}", get(get_room_handler))    
+        .route("/rooms/{id}", get(get_room_handler).patch(update_room_handler).delete(delete_room_handler))    
         .route("/rooms/code/{public_code}", get(get_room_by_public_code_handler))
-        .route("/rooms/{id}", patch(update_room_handler))
-        .route("/rooms/{id}", delete(delete_room_handler))
 }
 
 

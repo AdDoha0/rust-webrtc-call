@@ -5,6 +5,15 @@ use axum::{
 use sqlx::Error as SqlxError;
 use serde::Serialize;
 use tracing::error; 
+use axum::extract::rejection::PathRejection;
+
+#[derive(Error, Debug)]
+pub enum PathError {
+    #[error("Invalid ID: {0}")]
+    InvalidId(String)
+}
+
+
 
 #[derive(Error, Debug)]
 pub enum DomainError {
@@ -58,7 +67,11 @@ impl From<SqlxError> for AppError {
     }
 }
 
-
+impl From<PathRejection> for AppError {
+    fn from(err: PathRejection) -> Self {
+        AppError::PathError(PathError::InvalidId(err.to_string()))
+    }
+}
 
 #[derive(Error, Debug)]
 pub enum AppError {
@@ -67,6 +80,9 @@ pub enum AppError {
 
     #[error(transparent)]
     Infrastructure(InfrastructureError),
+
+    #[error(transparent)]
+    PathError(PathError)
 }
 
 #[derive(Serialize)]
@@ -91,6 +107,17 @@ impl IntoResponse for AppError {
                 (status, body).into_response()
             }
 
+            AppError::PathError(path_err) => {
+                let (status, r#type) = match path_err {
+                    PathError::InvalidId(_) => (StatusCode::BAD_REQUEST, "BadRequest"),
+                };
+                let body = Json(ErrorResponse { 
+                    error: path_err.to_string(), 
+                    r#type: r#type.to_string() 
+                });
+                (status, body).into_response()
+            }
+            
             AppError::Infrastructure(infra) => {
                 let (status, r#type, msg) = match infra {
                     InfrastructureError::DatabaseError(err) => match err {
@@ -113,3 +140,16 @@ impl IntoResponse for AppError {
         }
     }
 }
+
+
+
+// use axum::extract::Path;
+
+// async fn get_room_handler(path: Result<Path<i32>, axum::extract::rejection::PathRejection>) -> Result<Json<RoomResponseDto>, AppError> {
+//     let room_id = match path {
+//         Ok(Path(id)) => id,
+//         Err(_) => return Err(DomainError::InvalidRoomId("Room id must be a number".to_string()).into()),
+//     };
+
+//     // дальше обычная логика поиска комнаты
+// }
