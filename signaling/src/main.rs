@@ -1,8 +1,7 @@
-use std::{net::SocketAddr, sync::Arc};
+use std::{net::SocketAddr};
 use tracing::{info, Level};
 use tracing_subscriber::{fmt, EnvFilter};
 use axum::{Router, routing::get};
-use tokio::sync::RwLock;
 use sqlx::PgPool;
 use std::env;
 
@@ -50,7 +49,7 @@ fn init_logging() {
 async fn main() {
     // Загрузим переменные окружения, если есть .env
     let _ = dotenvy::dotenv();
-    
+
     // Инициализируем логирование
     init_logging();
 
@@ -67,10 +66,10 @@ async fn main() {
         .parse()
         .expect("Invalid HOST/PORT provided");
 
-    // Инициализируем общий хаб 
-    let hub = Arc::new(RwLock::new(ws::hub::WsHub::new()));
+    // Инициализируем новый WebSocket хаб
+    let ws_hub = ws::WsHub::new();
 
-    dotenv::dotenv().ok(); 
+    dotenv::dotenv().ok();
     let database_url = env::var("DATABASE_URL").expect("Connect database url!");
 
     info!("Connecting to database...");
@@ -79,7 +78,7 @@ async fn main() {
         .expect("Failed to connect to Postgres");
     info!("Database connection established successfully");
 
-    let state = AppState::new(db_pool, hub);
+    let state = AppState::new(db_pool, ws_hub);
     let app = app_router(state);
 
 
